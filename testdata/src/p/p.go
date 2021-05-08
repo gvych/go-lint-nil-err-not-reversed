@@ -1,30 +1,15 @@
 package p
 
-func notPrintfFuncAtAll() {}
+import "errors"
+import "fmt"
 
-func funcWithEllipsis(args ...interface{}) {}
-
-func printfLikeButWithStrings(format string, args ...string) {}
-
-func printfLikeButWithBadFormat(format int, args ...interface{}) {}
-
-func secondArgIsNotEllipsis(format string, arg int) {}
-
-func printfLikeButWithExtraInterfaceMethods(format string, args ...interface {
-	String() string
-}) {
+func funcWithReversedErrHandling() {
+	err := errors.New("error")
+	if err != nil {
+	   //do nothing
+	   fmt.Println("hello world")
+	} else {
+		//"err" usage in wrong place
+	  fmt.Println(err)
+	}
 }
-
-func prinfLikeFuncf(format string, args ...interface{}) {}
-
-func prinfLikeFuncWithReturnValue(format string, args ...interface{}) string {
-	return ""
-}
-
-func prinfLikeFuncWithAnotherFormatArgName(msg string, args ...interface{}) {}
-
-func prinfLikeFunc(format string, args ...interface{}) {} // want "printf-like formatting function"
-
-func prinfLikeFuncWithExtraArgs1(extraArg, format string, args ...interface{}) {} // want "printf-like formatting function"
-
-func prinfLikeFuncWithExtraArgs2(extraArg int, format string, args ...interface{}) {} // want "printf-like formatting function"
