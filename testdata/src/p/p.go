@@ -20,4 +20,10 @@ func funcWithReversedErrHandling() {
 	   //do nothing
 	   fmt.Println("hello world")
 	}
+
+	i := 1
+	if i == 2 {
+	  fmt.Println("skipped block")
+	}
+
 }
