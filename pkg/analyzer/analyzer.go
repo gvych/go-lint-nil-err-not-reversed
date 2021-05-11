@@ -1,10 +1,8 @@
 package analyzer
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
-	//"strings"
 
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
@@ -19,28 +17,22 @@ var Analyzer = &analysis.Analyzer{
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 }
 
-type visitor struct{}
-
-func (v visitor) Visit(n ast.Node) ast.Visitor {
-		  //ast.Inspect(blockStmt, func(n ast.Node) bool {
-		    fmt.Printf("---------Visit enter\n")
-		    fmt.Printf("---------%T\n", n)
+func (v *visitor) Visit(n ast.Node) ast.Visitor {
+	if n == nil {
+        return nil
+    }
 				ident, ok := n.(*ast.Ident)
 				if ok {
 				  if ident != nil && ident.Name == "err" {
-		        return nil
+						v.block = append(v.block,new(bool))
+		        return v
 				  }
 				}
+		return v
+}
 
-		      //pass.Reportf(n.Pos(), "err is not referenced inside block statement")
-		    if n == nil {
-					fmt.Printf("err is not referenced inside block statement\n")
-					return nil
-				}
-					return v
-		  //})
-			//return
-		//}
+type visitor struct{
+	block []*bool
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -51,58 +43,16 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	inspector.Preorder(nodeFilter, func(node ast.Node) {
 		ifDecl := node.(*ast.IfStmt)
 
-    fmt.Printf("before BinaryExpr IF\n")
-    fmt.Printf("%T\n", ifDecl)
 		if res := ifDecl.Cond.(*ast.BinaryExpr); res != nil && res.Op == token.NEQ { //}&& res.Y == nil {
-      fmt.Printf("  inside BinaryExpr IF\n")
-      fmt.Printf("  %T\n", ifDecl.Body)
-
 			blockStmt := ifDecl.Body
 			if blockStmt != nil {
-        fmt.Printf("    inside blockStmt NOT nil\n")
-        fmt.Printf("    %T\n", blockStmt)
-
-       	nodeIdentFilter := []ast.Node{
-       		(*ast.Ident)(nil),
-       	}
-       	inspector.Preorder(nodeIdentFilter, func(node ast.Node) {
-          	ident, ok := node.(*ast.Ident)
-
-       			if ok {
-       			  if ident != nil && ident.Name == "err" {
-            fmt.Printf("      inside second Preorder\n")
-            fmt.Printf("      %T\n", ident)
-            fmt.Printf("      %s\n", ident.Name)
-           // fmt.Printf("      %d\n", ident.Pos)
-		        pass.Reportf(ident.Pos(), "ident.Pos")
-       		        return
-       			  }
-       			}
-	      })
-
-
-      //  v := visitor{}
-       // ast.Walk(v, blockStmt)
-
+        v := visitor{}
+        ast.Walk(&v, blockStmt)
+				if len(v.block) == 0 {
+		        pass.Reportf(blockStmt.Pos(), "err is not referenced inside error handling block, is there a typo?")
+				}
 			}
-			return
 		}
 	})
-
-//
-//1 : *ast.IfStmt
-//Cond : *ast.BinaryExpr (Op: !=)
-//X : *ast.Ident (Name: err)
-//Obj : *ast.Object (Kind: var, Name: err)
-//Y : *ast.Ident (Name: nil)
-//− Body : *ast.BlockStmt
-//...
-//+ Else : *ast.BlockStmt
-//...
-//− 0 : *ast.Ident (Name: err)
-// Obj : *ast.Object (Kind: var, Name: err)
-//...
-
-
 	return nil, nil
 }
