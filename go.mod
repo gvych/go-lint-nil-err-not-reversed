@@ -1,5 +1,5 @@
-module github.com/jirfag/go-printf-func-name
+module github.com/gvych/go-lint-nil-err-not-reversed
 
 go 1.13
 
-require golang.org/x/tools v0.0.0-20191108193012-7d206e10da11
+require golang.org/x/tools v0.1.1 // indirect

@@ -27,4 +27,8 @@ func funcWithReversedErrHandling() {
 	  fmt.Println("skipped block")
 	}
 
+  core := "test"
+	if core != "" {
+	  fmt.Println("skipped block")
+	}
 }

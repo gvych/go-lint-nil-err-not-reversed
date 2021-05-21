@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jirfag/go-printf-func-name/pkg/analyzer"
+	"github.com/gvych/go-lint-nil-err-not-reversed/pkg/analyzer"
 	"golang.org/x/tools/go/analysis/analysistest"
 )
 
