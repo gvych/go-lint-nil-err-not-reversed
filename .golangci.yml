@@ -1,0 +1,28 @@
+run:
+  # include test files or not, default is true
+  tests: false
+
+linters-settings:
+  custom:
+    go-lint-nil-err:
+      path: /home/vagrant/git/github.com/go-lint-nil-err-not-reversed/go-lint-nill-err.so
+      description: The description of the linter
+      original-url: "github.com/gvych/go-lint-nil-err-not-reversed/pkg/analyzer"
+
+  gocritic:
+    enabled_tags:
+      - diagnostic
+      - experimental
+      - performance
+    disabled-tags:
+      - style
+
+linters:
+  enable:
+    - goconst
+    - gocritic
+    - exportloopref
+    - errorlint
+#    - exhaustivestruct
+#    - noctx
+

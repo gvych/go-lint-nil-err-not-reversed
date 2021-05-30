@@ -46,14 +46,20 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if res, _ := ifDecl.Cond.(*ast.BinaryExpr); res != nil && res.Op == token.NEQ {
 			x, _ := res.X.(ast.Expr).(*ast.Ident)
 			y, _ := res.Y.(ast.Expr).(*ast.Ident)
-			if x.Name != "err" || y.Name != "nil" { return } //only constructions "if err != nill" accepted
+			if (x != nil && x.Name != "err") || (y != nil && y.Name != "nil") { return } //only constructions "if err != nill" accepted
 
 			blockStmt := ifDecl.Body
 			if blockStmt != nil {
 				v := visitor{}
 				ast.Walk(&v, blockStmt)
 				if len(v.block) == 0 {
-					pass.Reportf(blockStmt.Pos(), "err is not referenced inside error handling block, there is a typo?")
+					elseStmt := ifDecl.Else
+					if elseStmt != nil {
+						ast.Walk(&v, elseStmt)
+				    if len(v.block) == 1 {
+			    		pass.Reportf(blockStmt.Pos(), "err is not referenced inside error handling block, but referenced in 'else' statement, there is a typo?")
+				    }
+					}
 				}
 			}
 		}

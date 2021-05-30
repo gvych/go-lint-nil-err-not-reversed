@@ -5,13 +5,6 @@ import "fmt"
 
 func funcWithReversedErrHandling() {
 	err := errors.New("error")
-	if err != nil {
-		//"err" not used
-		fmt.Println("hello world")
-	} else {
-		//"err" usage in wrong place
-		fmt.Println(err)
-	}
 
 	if err != nil {
 		//"err" usage in Right place
@@ -27,8 +20,21 @@ func funcWithReversedErrHandling() {
 		fmt.Println("skipped block")
 	}
 
-	core := "test"
+  var f *int
+	if f != nil {
+		fmt.Println("skipped block")
+	}
+		core := "test"
 	if core != "" {
 		fmt.Println("skipped block")
+	}
+
+
+	if err != nil {
+		//"err" not used
+		fmt.Println("hello world")
+	} else {
+		//"err" usage in wrong place
+		fmt.Println(err)
 	}
 }
