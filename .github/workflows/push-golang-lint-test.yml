@@ -1,0 +1,79 @@
+name: Golang
+
+on:
+  pull_request:
+    paths:
+      - '**/*.go'
+
+concurrency:
+  group: "golang"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    #https://github.com/marketplace/actions/setup-go-faster
+#    - uses: WillAbides/setup-go-faster@v1.6.0
+#      with:
+#        go-version: 1.16.x
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Test
+      run: |
+        CGO_ENABLED=0 go test ./... || CGO_ENABLED=0 go test ./... -json > tests.json
+#       go test `go list ./... | grep -v examples` -coverprofile=coverage.txt -covermode=atomic
+#       uses: codecov/codecov-action@v1.0.2
+
+    - name: Annotate tests
+      if: always()
+      uses: guyarb/golang-test-annotations@v0.5.0
+      with:
+        test-results: tests.json
+
+    - uses: act10ns/slack@v1
+      if: ${{ failure() }}
+      with:
+        status: ${{ job.status }}
+        steps: ${{ toJson(steps) }}
+        channel: '#tech_team'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+#    - uses: actions/cache@v2
+#      with:
+#        path: |
+#          ~/.cache/go-build
+#        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+#        restore-keys: |
+#          ${{ runner.os }}-go-
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.37.1
+        # Go Build Cache 400Mb?
+        args: --timeout=6m
+        # Optional: golangci-lint command line arguments.
+        # args: --issues-exit-code=0
+
+        # Optional: show only new issues if it's a pull request. The default value is `false`.
+        # only-new-issues: true
