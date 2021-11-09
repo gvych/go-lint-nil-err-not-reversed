@@ -35,10 +35,18 @@ jobs:
           ${{ runner.os }}-go-
 
     - name: Test
-      run: |
-        CGO_ENABLED=0 go test ./... || CGO_ENABLED=0 go test ./... -json > tests.json
-#       go test `go list ./... | grep -v examples` -coverprofile=coverage.txt -covermode=atomic
-#       uses: codecov/codecov-action@v1.0.2
+      run: >
+        CGO_ENABLED=0 go test ./... ||
+          CGO_ENABLED=0 go test ./... -json > tests.json ||
+          CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        files: ./coverage.txt
+        verbose: true
 
     - name: Annotate tests
       if: always()
