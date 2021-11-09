@@ -3,6 +3,7 @@ package p
 import "errors"
 import "fmt"
 
+
 func funcWithReversedErrHandling() {
 	err := errors.New("error")
 
