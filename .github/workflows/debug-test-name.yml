@@ -19,4 +19,6 @@ jobs:
               run_id: context.runId,
             });
             return `${context.repo.owner}/${context.repo.repo}/actions/workflows/${result.data.workflow_id}`
+      - run: echo ${{steps.allure-job-uid.outputs.result}}
+      
  
