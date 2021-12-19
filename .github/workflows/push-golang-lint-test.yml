@@ -10,6 +10,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  sql:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: yokawasa/action-sqlcheck@v1.3.0
+      with:
+        post-comment: true
+        #risk-level: 3
+        verbose: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     runs-on: ubuntu-latest
     steps:
