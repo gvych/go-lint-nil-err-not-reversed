@@ -15,6 +15,7 @@ jobs:
   sql:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: yokawasa/action-sqlcheck@v1.3.0
       with:
         post-comment: true
