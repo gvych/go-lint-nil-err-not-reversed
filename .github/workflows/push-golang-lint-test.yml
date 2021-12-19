@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '**/*.go'
+      - '**/*.sql'
+      - '*.sql'
 
 concurrency:
   group: "golang"
