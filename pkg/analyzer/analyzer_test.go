@@ -18,3 +18,7 @@ func TestAll(t *testing.T) {
 	testdata := filepath.Join(filepath.Dir(filepath.Dir(wd)), "testdata")
 	analysistest.Run(t, testdata, analyzer.Analyzer, "p")
 }
+
+func TestAll(t *testing.T) {
+  t.Fatalf("Fail for the sake of failing")
+}
