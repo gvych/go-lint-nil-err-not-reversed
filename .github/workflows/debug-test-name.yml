@@ -1,0 +1,24 @@
+name: debug-test
+
+on:  
+  workflow_dispatch:
+ 
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v4
+        id: allure-job-uid
+        with:
+          result-encoding: string
+          script: |
+            const result = await github.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            return `${context.repo.owner}/${context.repo.repo}/actions/workflows/${result.data.workflow_id}`
+      - run: echo ${{steps.allure-job-uid.outputs.result}}
+      
+ 

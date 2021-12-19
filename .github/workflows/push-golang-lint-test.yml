@@ -34,9 +34,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-
     - name: Test
-      run: CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic -json > tests.json || echo return_true
+      run: CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic -json | tee tests.json || echo return_true
 
     - name: Annotate tests
       if: always()
