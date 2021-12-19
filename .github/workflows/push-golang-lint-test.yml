@@ -19,7 +19,7 @@ jobs:
     - uses: yokawasa/action-sqlcheck@v1.3.0
       with:
         post-comment: true
-        #risk-level: 3
+        risk-level: 1
         verbose: true
         token: ${{ secrets.GITHUB_TOKEN }}
 

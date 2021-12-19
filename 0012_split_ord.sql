@@ -41,6 +41,7 @@ INSERT INTO payments(
     error,
     avs,
     created_at,
+  syntax_error_for_generating_problem,
     updated_at
 ) SELECT
          id,
