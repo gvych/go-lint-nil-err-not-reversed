@@ -19,6 +19,6 @@ func TestAll(t *testing.T) {
 	analysistest.Run(t, testdata, analyzer.Analyzer, "p")
 }
 
-func TestAll(t *testing.T) {
+func TestFail(t *testing.T) {
   t.Fatalf("Fail for the sake of failing")
 }
