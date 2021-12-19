@@ -34,11 +34,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
+
     - name: Test
-      run: >
-        CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic ||
-        CGO_ENABLED=0 go test ./... ||
-          CGO_ENABLED=0 go test ./... -json > tests.json || echo 0
+      run: CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic -json > tests.json || echo return_true
+
+    - name: Annotate tests
+      if: always()
+      uses: guyarb/golang-test-annotations@v0.5.0
+      with:
+        test-results: tests.json
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
@@ -48,21 +52,6 @@ jobs:
         fail_ci_if_error: true
         files: ./coverage.txt
         verbose: true
-
-    - name: Annotate tests
-      if: always()
-      uses: guyarb/golang-test-annotations@v0.5.0
-      with:
-        test-results: tests.json
-
-#    - uses: act10ns/slack@v1
-#      if: ${{ failure() }}
-#      with:
-#        status: ${{ job.status }}
-#        steps: ${{ toJson(steps) }}
-#        channel: '#tech_team'
-#      env:
-#        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   lint:
     runs-on: ubuntu-latest
