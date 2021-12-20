@@ -15,20 +15,42 @@ concurrency:
 jobs:
   sql:
     runs-on: ubuntu-latest
+    container: chapsuk/miga:v0.7.2
+    services:
+      postgres:
+        image: postgres:13.1-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stella
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: yokawasa/action-sqlcheck@v1.3.0
-      with:
-        post-comment: true
-        risk-level: 1
-        verbose: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: all up
+        env:
+          MIGA_MIGRATE_PATH: "database/postgres/migrations"
+          MIGA_SEED_PATH: "dockerfiles/dev/seeds"
+          MIGA_POSTGRES_USER: postgres
+          MIGA_POSTGRES_PASSWORD: postgres
+          MIGA_POSTGRES_HOST: localhost
+          MIGA_POSTGRES_PORT: 5432
+          MIGA_POSTGRES_DB: stella
+          MIGA_POSTGRES_OPTIONS: sslmode=disable
+          MIGA_DRIVER: goose
+          MIGA_LOG_LEVEL: info
+          #MIGA_LOG_FORMAT: json
 
   test:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
-      if: ${{ github.event.action == 'labeled' }}
+      #if: ${{ github.event.action == 'labeled' }}
       uses: actions/setup-go@v2
       with:
         go-version: 1.16.x
