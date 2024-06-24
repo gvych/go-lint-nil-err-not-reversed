@@ -2,18 +2,58 @@ name: Golang
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize, labeled]
     paths:
       - '**/*.go'
+      - '**/*.sql'
+      - '*.sql'
 
 concurrency:
   group: "golang"
   cancel-in-progress: false
 
 jobs:
+  sql:
+    runs-on: ubuntu-latest
+    #container: chapsuk/miga:v0.7.2
+    services:
+      postgres:
+        image: postgres:13.1-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stella
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - uses: docker://chapsuk/miga:v0.7.2
+        with:
+          entrypoint: /miga
+          args: "all up"
+        env:
+          MIGA_MIGRATE_PATH: "database/postgres/migrations"
+          MIGA_SEED_PATH: "dockerfiles/dev/seeds"
+          MIGA_POSTGRES_USER: postgres
+          MIGA_POSTGRES_PASSWORD: postgres
+          MIGA_POSTGRES_HOST: postgres
+          MIGA_POSTGRES_PORT: 5432
+          MIGA_POSTGRES_DB: stella
+          MIGA_POSTGRES_OPTIONS: sslmode=disable
+          MIGA_DRIVER: goose
+          MIGA_LOG_LEVEL: debug
+          #MIGA_LOG_FORMAT: json
+
   test:
     runs-on: ubuntu-latest
     steps:
     - name: Install Go
+      #if: ${{ github.event.action == 'labeled' }}
       uses: actions/setup-go@v2
       with:
         go-version: 1.16.x
@@ -35,10 +75,13 @@ jobs:
           ${{ runner.os }}-go-
 
     - name: Test
-      run: >
-        CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic ||
-        CGO_ENABLED=0 go test ./... ||
-          CGO_ENABLED=0 go test ./... -json > tests.json || echo 0
+      run: CGO_ENABLED=0 go test ./... -coverprofile=coverage.txt -covermode=atomic -json | tee tests.json || echo return_true
+
+    - name: Annotate tests
+      if: always()
+      uses: guyarb/golang-test-annotations@v0.5.0
+      with:
+        test-results: tests.json
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
@@ -48,21 +91,6 @@ jobs:
         fail_ci_if_error: true
         files: ./coverage.txt
         verbose: true
-
-    - name: Annotate tests
-      if: always()
-      uses: guyarb/golang-test-annotations@v0.5.0
-      with:
-        test-results: tests.json
-
-#    - uses: act10ns/slack@v1
-#      if: ${{ failure() }}
-#      with:
-#        status: ${{ job.status }}
-#        steps: ${{ toJson(steps) }}
-#        channel: '#tech_team'
-#      env:
-#        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   lint:
     runs-on: ubuntu-latest
